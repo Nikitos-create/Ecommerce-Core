@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+.pytest_cache/
+htmlcov/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Poetry
+poetry.lock
+
+# Logs
+logs/
+*.log

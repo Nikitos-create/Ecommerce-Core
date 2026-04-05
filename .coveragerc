@@ -1,0 +1,12 @@
+[run]
+source = src/ecommerce_core
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == ["']__main__["']:
+    if __name__ == '__main__':
+    raise (AssertionError|Exception)
+    pass
+
+show_missing = True

@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "ecommerce-core"
+version = "0.1.0"
+description = "Банковское приложение"
+authors = ["Rukin Nikita <walfisch91@gmail.com>"]
+readme = "README.md"
+packages = [{include = "ecommerce_core", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
+coverage = "^7.13.5"
+pytest-cov = "^7.1.0"
+black = "^26.3.1"
+flake8 = "^7.3.0"
+isort = "^8.0.1"
+mypy = "^1.19.1"
+
+[tool.mypy]
+python_version = "3.12"
+files = ["ecommerce_core", "tests"]   
+exclude = ["src"]                     
+follow_imports = "silent"
+namespace_packages = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
