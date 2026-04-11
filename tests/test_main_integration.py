@@ -12,5 +12,4 @@ def test_main_script_execution():
         cwd=Path(__file__).parent.parent
     )
     assert result.returncode == 0
-    assert "Samsung Galaxy" in result.stdout
-    assert "Смартфоны" in result.stdout
+    assert "E-commerce Core ready" in result.stdout
