@@ -25,9 +25,27 @@
 
 &#x20; - `add\_product()` — добавление товаров в категорию
 
+#### Установка и запуск
 
+### 1. Клонируй репозиторий
+```bash
+git clone https://github.com/твой_username/ecommerce-core.git
+cd ecommerce-core
+```
+
+### 2. Установка зависимостей
+```bash
+pip install -r requirements.txt
+# или
+poetry install
+```
+
+### 3. Запуск проверок
+```bash
+PYTHONPATH=. pytest --cov=ecommerce_core tests/ -v
+flake8 .
+```
 
 
 
 Автор: Никита Рукин © 2026
-
