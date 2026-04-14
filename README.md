@@ -3,7 +3,7 @@
 ## Features:
 
 * Category/Product модели
-* JSON парсинг
+* JSON парсинг - сбор данных из JSON-файлов
 * 16 тестов
 * CI-ready
 
@@ -11,7 +11,7 @@
 
 \### ✅ Реализованные возможности
 
-
+Структурирование товаров по категориям с помощью классов Product, Category
 
 \*\*Модели данных:\*\*
 
@@ -26,16 +26,6 @@
 &#x20; - `add\_product()` — добавление товаров в категорию
 
 
-
-\*\*Загрузка тестовых данных:\*\*
-
-```python
-
-root\_category = Category.load\_ecommerce\_data()
-
-\# Electronics → iPhone 15, MacBook
-
-```
 
 
 
