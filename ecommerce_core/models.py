@@ -8,8 +8,8 @@ class Product:
 
 class Category:
     # Атрибуты класса по заданию
-    category_count = 0
-    product_count = 0
+    category_count: int = 0
+    product_count: int = 0
 
     def __init__(self, name: str, description: str):
         self.name = name
@@ -17,7 +17,7 @@ class Category:
         self.products = []
         Category.category_count += 1
 
-    def add_product(self, product: Product):
+    def add_product(self, product: 'Product'):
         """Добавляет Product в категорию"""
         self.products.append(product)
         Category.product_count += 1
