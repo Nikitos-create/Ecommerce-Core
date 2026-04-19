@@ -16,7 +16,7 @@ class Category:
         self.description = description
         self.products = []
         Category.category_count += 1
-        Category.product_count += 0
+        Category.product_count += len(self.products)
 
     def add_product(self, product: 'Product'):
         """Добавляет Product в категорию"""
