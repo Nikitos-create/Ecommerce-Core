@@ -16,13 +16,14 @@ class Category:
         self.description = description
         self.products = []
         Category.category_count += 1
+        Category.product_count += 0
 
     def add_product(self, product: 'Product'):
         """Добавляет Product в категорию"""
         self.products.append(product)
         Category.product_count += 1
 
-    @classmethod  # ← 4 ПРОБЕЛА!
+    @classmethod
     def load_ecommerce_data(cls):  # ← 4 ПРОБЕЛА!
         """🆕 Загрузка тестовых данных — метод класса!"""
         electronics = cls("Electronics", "Гаджеты и техника")
