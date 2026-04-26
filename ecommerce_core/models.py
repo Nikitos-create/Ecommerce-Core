@@ -94,15 +94,13 @@ class Category:
 
         return "\n".join(lines)
 
-
     def __str__(self) -> str:
-        if not self.__products:
-            return "Нет товаров"
-        lines = []
-        for product in self.__products:
-            line = f"{product.name}, {product.price} руб. Остаток: {product.qty} шт."
-            lines.append(line)
-        return "\n".join(lines)
+        """
+        Возвращает строку в формате:
+        'Название категории, количество продуктов: X шт.'
+        """
+        total_qty = sum(product.qty for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_qty} шт."
 
     def get_quantity_summary(self) -> str:
         """
@@ -165,4 +163,52 @@ class CategoryProductIterator:
         product = self.__products[self._index]
         self._index += 1
         return product
+
+class Smartphone(Product):
+    def __init__(
+        self,
+        name: str,
+        desc: str,
+        price: float,
+        qty: int,
+        efficiency: str,
+        model: str,
+        memory: int,
+        color: str
+    ):
+        super().__init__(name, desc, price, qty)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self) -> str:
+        return (
+            f"{self.name} {self.model}, {self.efficiency}, {self.memory} ГБ, "
+            f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
+        )
+
+class LawnGrass(Product):
+    def __init__(
+        self,
+        name: str,
+        desc: str,
+        price: float,
+        qty: int,
+        country: str,
+        germination_period: int,
+        color: str
+    ):
+        super().__init__(name, desc, price, qty)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self) -> str:
+        return (
+            f"{self.name}, {self.country}, всхожесть: {self.germination_period} дней, "
+            f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
+        )
+
+
 
