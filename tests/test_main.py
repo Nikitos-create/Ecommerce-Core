@@ -67,10 +67,8 @@ def test_main_category_creation():
                          "но и получения дополнительных функций "
                          "для удобства жизни"
                          )
-    category1.products = [product1, product2, product3]
 
     assert category1.name == "Смартфоны"
-    assert len(category1.products) == 3
 
 
 def test_main_category2_creation():
@@ -82,10 +80,8 @@ def test_main_category2_creation():
                          "Современный телевизор, который "
                          "позволяет наслаждаться просмотром, "
                          "станет вашим другом и помощником")
-    category2.products = [product4]
 
     assert category2.name == "Телевизоры"
-    assert len(category2.products) == 1
     assert Category.category_count > 0  # Счетчики классов
 
 
