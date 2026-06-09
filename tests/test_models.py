@@ -1,6 +1,8 @@
 import sys
 import os
-from ecommerce_core.models import Product, Category, CategoryProductIterator
+from ecommerce_core.models import (Product, Category,
+                                   CategoryProductIterator,
+                                   Smartphone, LawnGrass)
 import pytest
 from decimal import Decimal
 
@@ -41,6 +43,8 @@ def test_category_counters():
     cat2 = Category("Одежда", "Бренды")
 
     assert Category.category_count == 2
+    assert cat1.name == "Электроника"
+    assert cat2.description == "Бренды"
 
 
 def test_category_products_counter():
@@ -89,6 +93,7 @@ def test_load_ecommerce_data_basic():
 
     assert root_cat.products == expected
 
+
 def test_category_add_remove_product():
     """add_product() + remove_product() если есть."""
     Category.product_count = 0
@@ -117,6 +122,7 @@ def test_models_imports():
     assert Product
     assert Category
     assert hasattr(Category, 'load_ecommerce_data')
+
 
 def test_product_price_getter():
     p = Product("Test", "", 999.99, 5)
@@ -177,9 +183,12 @@ def test_add_or_update_product_duplicate():
     assert len(items) == 1
     assert items[0] is p1
 
+
 def test_category_products_private():
     category = Category("Electronics", "Гаджеты")
     product = Product("iPhone 15", "Смартфон", 99999.99, 10)
+
+    category.add_product(product)
 
     assert hasattr(category, "_Category__products")  # приватный атрибут
     with pytest.raises(AttributeError):
@@ -194,6 +203,7 @@ def test_category_add_product():
     category.add_product(product)
     assert len(category._Category__products) == 1
     assert category._Category__products[0] is product
+
 
 def test_category_products_getter():
     category = Category("Electronics", "Гаджеты")
@@ -211,11 +221,13 @@ def test_category_products_getter():
     )
     assert category.products == expected
 
+
 def test_product_price_private():
     product = Product("iPhone 15", "Смартфон", 99999.99, 10)
     assert product.price == 99999.99
     with pytest.raises(AttributeError):
         _ = product.__price
+
 
 def test_product_str_format():
     """Проверяет строковое представление Product."""
@@ -234,6 +246,7 @@ def test_product_str_with_zero_price():
     p = Product("Test", "", 0.0, 5)
     expected = "Test, 0.0 руб. Остаток: 5 шт."
     assert str(p) == expected
+
 
 def test_product_add_typical_case():
     """a: 100 руб., 10 шт. → 1000 руб.
@@ -275,3 +288,71 @@ def test_product_add_with_not_product():
     result = a.__add__("b")
     assert result is NotImplemented
 
+
+def test_smartphone_inheritance():
+    s = Smartphone(
+        "iPhone 15 Pro",
+        "256GB Titanium",
+        Decimal("119999.99"),
+        10,
+        efficiency="A17",
+        model="15 Pro",
+        memory=256,
+        color="Titanium"
+    )
+    assert s.name == "iPhone 15 Pro"
+    assert s.qty == 10
+    assert "A17, 256 ГБ, Titanium" in str(s)
+
+
+def test_lawngrass_inheritance():
+    lg = LawnGrass(
+        "Газонная трава Premium",
+        "Высокоурожайная",
+        Decimal("999.99"),
+        100,
+        country="Россия",
+        germination_period=3,
+        color="Зелёная"
+    )
+    assert lg.country == "Россия"
+    assert lg.germination_period == 3
+    assert "период прорастания: 3 дней" in str(lg)
+
+
+def test_product_add_same_type():
+    a = Product("Test A", "", 100.0, 10)
+    b = Product("Test B", "", 200.0, 5)
+    total = a + b
+    assert total == 2000.0
+
+
+def test_product_add_different_types_raises():
+    s = Smartphone("Sm A", "", 1000.0, 5, "A15", "SE", 64, "White")
+    lg = LawnGrass("Turf", "", 999.99, 100, "Россия", 3, "Green")
+
+    with pytest.raises(TypeError):
+        s + lg
+
+    with pytest.raises(TypeError):
+        lg + s
+
+
+def test_category_add_valid_product():
+    c = Category("Электроника", "Гаджеты")
+    p = Product("Test", "", 100.0, 10)
+    s = Smartphone("Sm A", "", 1000.0, 5, "A15", "SE", 64, "White")
+
+    c.add_product(p)
+    c.add_product(s)
+    assert len(c._Category__products) == 2
+
+
+def test_category_add_invalid_type_raises():
+    c = Category("Электроника", "Гаджеты")
+
+    with pytest.raises(TypeError):
+        c.add_product("not a product")
+
+    with pytest.raises(TypeError):
+        c.add_product(42)

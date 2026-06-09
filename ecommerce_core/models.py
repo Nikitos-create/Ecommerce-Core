@@ -1,68 +1,165 @@
-class Product:
+from abc import ABC, abstractmethod
+
+
+class BaseOrderable(ABC):
+    """
+    Общий базовый класс для заказа и категории.
+    Определяет единый базовый интерфейс для объектов,
+    которые можно "заказывать" и учитывать по количеству и стоимости.
+    """
+
+    @abstractmethod
+    def __init__(self, name: str, description: str) -> None:
+        pass
+
+    @property
+    @abstractmethod
+    def item_count(self) -> int:
+        return 0
+
+    @property
+    @abstractmethod
+    def total_cost(self) -> float:
+        return 0.0
+
+
+# === 1. Задание 1 — абстрактный базовый класс BaseProduct ===
+class BaseProduct(ABC):
+    """
+    Базовый абстрактный класс для всех продуктов.
+    Общая функциональность: название, описание, цена, количество.
+    """
+
+    @abstractmethod
+    def __init__(self, name: str, desc: str, price: float, qty: int) -> None:
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+    @abstractmethod
+    def __add__(self, other: 'BaseProduct') -> float:
+        pass
+
+    @property
+    @abstractmethod
+    def price(self) -> float:
+        pass
+
+    @price.setter
+    @abstractmethod
+    def price(self, value: float) -> None:
+        pass
+
+
+# === 2. Задание 2 — миксин PrintCreationMixin ===
+class PrintCreationMixin:
+    """
+    Миксин: при создании объекта печатает в консоль,
+    от какого класса и с какими параметрами он был создан.
+    """
+
+    def __init__(self, *args, **kwargs):
+        class_name = self.__class__.__name__
+        args_str = ', '.join(repr(arg) for arg in args)
+        if kwargs:
+            kwargs_str = ', '.join(f'{k}={v!r}' for k, v in kwargs.items())
+            line = f"{class_name}({args_str}, {kwargs_str})"
+        else:
+            line = f"{class_name}({args_str})"
+
+        print(line)
+
+        self._init_args = args
+        self._init_kwargs = kwargs
+
+    def __repr__(self) -> str:
+        args_str = ', '.join(repr(arg) for arg in self._init_args)
+        if self._init_kwargs:
+            kwargs_str = ', '.join(
+                f'{k}={v!r}' for k, v in self._init_kwargs.items()
+            )
+            return f"{self.__class__.__name__}({args_str}, {kwargs_str})"
+        else:
+            return f"{self.__class__.__name__}({args_str})"
+
+
+class Product(PrintCreationMixin, BaseProduct):
+    """
+    Конкретный класс продукта, наследуется от BaseProduct и миксина.
+    """
+
     def __init__(self, name: str, desc: str, price: float, qty: int):
+        super().__init__(name, desc, price, qty)
+
         self.name = name
         self.desc = desc
         self.__price = price
         self.qty = qty
 
-    @property
-    def price(self) -> float:
-        """Геттер: чтение цены"""
-        return self.__price
-
-    @price.setter
-    def price(self, new_price: float):
-        """Сеттер: проверка цены"""
-        if new_price <= 0:
-            print("Цена не должна быть нулевая или отрицательная")
-            return
-
-        if new_price < self.__price:  # 🔍 Цена ПОНИЗИЛАСЬ!
-            confirm = input(f"Цена снижается с {self.__price} до {new_price}. Подтвердить? (y/n): ")
-            if confirm.lower() != 'y':  # ❌ НЕ 'y'
-                print("Изменение цены отменено")
-                return
-
-        self.__price = new_price  # ✅ Устанавливаем!
-
     def __str__(self) -> str:
-        """Строковое представление продукта в формате:
-        'Название, X руб. Остаток: X шт.'
-            """
+        """Строковое представление продукта."""
         return f"{self.name}, {self.price} руб. Остаток: {self.qty} шт."
 
-    def __add__(self, other: 'Product') -> float:
-        """
-        Сложение товаров: суммарная стоимость всех товаров на складе.
-        Пример: 100*10 + 200*2 = 1400.
-        """
-        if not isinstance(other, Product):
+    def __add__(self, other: 'BaseProduct') -> float:
+        """Сложение товаров по общей стоимости на складе."""
+        if not isinstance(other, BaseProduct):
             return NotImplemented
+        if type(self) is not type(other):
+            raise TypeError(
+                "Можно складывать только товары "
+                "из одинакового класса продуктов"
+            )
 
         self_value = self.price * self.qty
         other_value = other.price * other.qty
         return self_value + other_value
 
+    @property
+    def price(self) -> float:
+        return self.__price
+
+    @price.setter
+    def price(self, new_price: float):
+        if new_price <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
+            return
+        if new_price < self.__price:
+            confirm = input(
+                f"Цена снижается с {self.__price} до {new_price}. "
+                f"Подтвердить? (y/n): "
+            )
+            if confirm.lower() != 'y':
+                print("Изменение цены отменено")
+                return
+        self.__price = new_price
+
     @classmethod
     def load_ecommerce_data(cls):
         electronics = cls("Electronics", "Гаджеты и техника")
-        electronics.add_product(Product("iPhone 15", "Смартфон", 99999.99, 10))
-        electronics.add_product(Product("MacBook", "Ноутбук", 199999.99, 5))
+        electronics.add_product(cls("iPhone 15", "Смартфон", 99999.99, 10))
+        electronics.add_product(cls("MacBook", "Ноутбук", 199999.99, 5))
         return electronics
+
 
 class Category:
     # Атрибуты класса по заданию
     category_count: int = 0
     product_count: int = 0
 
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, description: str, products: list):
         self.name = name
         self.description = description
         self.__products = []
         Category.category_count += 1
 
-    def add_product(self, product: 'Product'):
+    def add_product(self, product: 'Product') -> None:
         """Добавляет Product в категорию"""
+        if not isinstance(product, Product):
+            raise TypeError("В категорию можно добавлять "
+                            "только объекты Product или его наследников")
+
         self.__products.append(product)
         Category.product_count += 1
 
@@ -89,7 +186,8 @@ class Category:
 
         lines = []
         for product in self.__products:
-            line = f"{product.name}, {product.price} руб. Остаток: {product.qty} шт."
+            line = (f"{product.name}, {product.price} руб. "
+                    f"Остаток: {product.qty} шт.")
             lines.append(line)
 
         return "\n".join(lines)
@@ -145,6 +243,7 @@ class Category:
         Category.product_count += 1
         return product
 
+
 class CategoryProductIterator:
     """Итератор по товарам одной категории."""
 
@@ -163,6 +262,7 @@ class CategoryProductIterator:
         product = self.__products[self._index]
         self._index += 1
         return product
+
 
 class Smartphone(Product):
     def __init__(
@@ -188,6 +288,7 @@ class Smartphone(Product):
             f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
         )
 
+
 class LawnGrass(Product):
     def __init__(
         self,
@@ -206,9 +307,34 @@ class LawnGrass(Product):
 
     def __str__(self) -> str:
         return (
-            f"{self.name}, {self.country}, всхожесть: {self.germination_period} дней, "
+            f"{self.name}, {self.country}, "
+            f"период прорастания: {self.germination_period} дней, "
             f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
         )
 
 
+class Order(BaseOrderable):
+    """
+    Класс заказа, в котором указан один товар, количество и итоговая стоимость.
+    """
 
+    def __init__(self, product: Product, qty: int):
+        self.product = product
+        self.qty = qty
+        super().__init__(product.name, product.desc)
+
+    @property
+    def name(self) -> str:
+        return self.product.name
+
+    @property
+    def description(self) -> str:
+        return self.product.desc
+
+    @property
+    def item_count(self) -> int:
+        return self.qty
+
+    @property
+    def total_cost(self) -> float:
+        return self.product.price * self.qty
