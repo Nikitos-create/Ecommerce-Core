@@ -238,7 +238,7 @@ class Category:
         # ✅ Создаём новый
         return Product(
             name=data["name"],
-            desc=data["desc"],
+            description=data["description"],
             price=data["price"],
             quantity=data["quantity"]
         )
@@ -247,7 +247,7 @@ class Category:
         # 🔍 Ищем дубликат по имени
         for existing in self.__products:
             if existing.name.lower() == product.name.lower():
-                existing.qty += product.quantity
+                existing.quantity += product.quantity
                 existing.price = max(existing.price, product.price)
                 return existing
 
@@ -333,7 +333,7 @@ class Order(BaseOrderable):
     def __init__(self, product: Product, quantity: int):
         self.product = product
         self.quantity = quantity
-        super().__init__(product.name, product.desc)
+        super().__init__(product.name, product.description)
 
     @property
     def name(self) -> str:
@@ -341,7 +341,7 @@ class Order(BaseOrderable):
 
     @property
     def description(self) -> str:
-        return self.product.desc
+        return self.product.description
 
     @property
     def item_count(self) -> int:
