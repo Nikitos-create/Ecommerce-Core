@@ -31,7 +31,13 @@ class BaseProduct(ABC):
     """
 
     @abstractmethod
-    def __init__(self, name: str, desc: str, price: float, qty: int) -> None:
+    def __init__(
+            self,
+            name: str,
+            description: str,
+            price: float,
+            quantity: int
+    ) -> None:
         pass
 
     @abstractmethod
@@ -90,17 +96,23 @@ class Product(PrintCreationMixin, BaseProduct):
     Конкретный класс продукта, наследуется от BaseProduct и миксина.
     """
 
-    def __init__(self, name: str, desc: str, price: float, qty: int):
-        super().__init__(name, desc, price, qty)
+    def __init__(
+            self,
+            name: str,
+            description: str,
+            price: float,
+            quantity: int
+    ):
+        super().__init__(name, description, price, quantity)
 
         self.name = name
-        self.desc = desc
+        self.description = description
         self.__price = price
-        self.qty = qty
+        self.quantity = quantity
 
     def __str__(self) -> str:
         """Строковое представление продукта."""
-        return f"{self.name}, {self.price} руб. Остаток: {self.qty} шт."
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other: 'BaseProduct') -> float:
         """Сложение товаров по общей стоимости на складе."""
@@ -112,8 +124,8 @@ class Product(PrintCreationMixin, BaseProduct):
                 "из одинакового класса продуктов"
             )
 
-        self_value = self.price * self.qty
-        other_value = other.price * other.qty
+        self_value = self.price * self.quantity
+        other_value = other.price * other.quantity
         return self_value + other_value
 
     @property
@@ -187,7 +199,7 @@ class Category:
         lines = []
         for product in self.__products:
             line = (f"{product.name}, {product.price} руб. "
-                    f"Остаток: {product.qty} шт.")
+                    f"Остаток: {product.quantity} шт.")
             lines.append(line)
 
         return "\n".join(lines)
@@ -197,16 +209,16 @@ class Category:
         Возвращает строку в формате:
         'Название категории, количество продуктов: X шт.'
         """
-        total_qty = sum(product.qty for product in self.__products)
-        return f"{self.name}, количество продуктов: {total_qty} шт."
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     def get_quantity_summary(self) -> str:
         """
         Возвращает строку вида:
         'Название категории, количество продуктов: 150 шт.'
         """
-        total_qty = sum(product.qty for product in self.__products)
-        return f"{self.name}, количество продуктов: {total_qty} шт."
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     @classmethod
     def load_ecommerce_data(cls):
@@ -228,14 +240,14 @@ class Category:
             name=data["name"],
             desc=data["desc"],
             price=data["price"],
-            qty=data["qty"]
+            quantity=data["quantity"]
         )
 
     def add_or_update_product(self, product: 'Product'):
         # 🔍 Ищем дубликат по имени
         for existing in self.__products:
             if existing.name.lower() == product.name.lower():
-                existing.qty += product.qty
+                existing.qty += product.quantity
                 existing.price = max(existing.price, product.price)
                 return existing
 
@@ -268,15 +280,15 @@ class Smartphone(Product):
     def __init__(
         self,
         name: str,
-        desc: str,
+        description: str,
         price: float,
-        qty: int,
+        quantity: int,
         efficiency: str,
         model: str,
         memory: int,
         color: str
     ):
-        super().__init__(name, desc, price, qty)
+        super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
@@ -285,7 +297,7 @@ class Smartphone(Product):
     def __str__(self) -> str:
         return (
             f"{self.name} {self.model}, {self.efficiency}, {self.memory} ГБ, "
-            f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
+            f"{self.color}, {self.price} руб. Остаток: {self.quantity} шт."
         )
 
 
@@ -293,14 +305,14 @@ class LawnGrass(Product):
     def __init__(
         self,
         name: str,
-        desc: str,
+        description: str,
         price: float,
-        qty: int,
+        quantity: int,
         country: str,
         germination_period: int,
         color: str
     ):
-        super().__init__(name, desc, price, qty)
+        super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
@@ -309,7 +321,7 @@ class LawnGrass(Product):
         return (
             f"{self.name}, {self.country}, "
             f"период прорастания: {self.germination_period} дней, "
-            f"{self.color}, {self.price} руб. Остаток: {self.qty} шт."
+            f"{self.color}, {self.price} руб. Остаток: {self.quantity} шт."
         )
 
 
@@ -318,9 +330,9 @@ class Order(BaseOrderable):
     Класс заказа, в котором указан один товар, количество и итоговая стоимость.
     """
 
-    def __init__(self, product: Product, qty: int):
+    def __init__(self, product: Product, quantity: int):
         self.product = product
-        self.qty = qty
+        self.quantity = quantity
         super().__init__(product.name, product.desc)
 
     @property
@@ -333,8 +345,8 @@ class Order(BaseOrderable):
 
     @property
     def item_count(self) -> int:
-        return self.qty
+        return self.quantity
 
     @property
     def total_cost(self) -> float:
-        return self.product.price * self.qty
+        return self.product.price * self.quantity
