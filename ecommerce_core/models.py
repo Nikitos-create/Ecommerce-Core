@@ -118,6 +118,11 @@ class Product(BaseProduct, PrintCreationMixin):
         super().__init__(name, description, price, quantity)
         PrintCreationMixin.__init__(self, name, description, price, quantity)
 
+        if quantity == 0:
+            raise ValueError(
+                "Товар с нулевым количеством не может быть добавлен"
+            )
+
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
@@ -159,6 +164,14 @@ class Category:
                 f"Остаток: {product.quantity} шт."
             )
         return '\n'.join(formatted_products)
+
+    def average_price(self):  # ✅ Новый метод
+        try:
+            total = sum(product.price for product in self.__products)
+            average = total / len(self.__products)  # ❌ Деление на ноль
+            return average
+        except ZeroDivisionError:  # ✅ Обработка деления на ноль
+            return 0
 
     @classmethod
     def load_ecommerce_data(cls):

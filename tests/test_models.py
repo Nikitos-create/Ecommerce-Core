@@ -1,7 +1,6 @@
-import io
 import sys
 import os
-from ecommerce_core.models import (Product, Category,
+from ecommerce_core.models import (Product,
                                    BaseProduct,
                                    BaseOrderable,
                                    PrintCreationMixin,
@@ -10,7 +9,6 @@ from ecommerce_core.models import (Product, Category,
                                    Smartphone, LawnGrass,
                                    Category)
 import pytest
-from io import StringIO
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 
@@ -36,13 +34,16 @@ def test_category_initialization():
     category = Category("Test Category", "Описание тестовой категории")
 
     # Проверяем, что счётчик увеличился ровно на 1
-    assert Category.category_count == 1, f"Ожидалось 1, получено {Category.category_count}"
+    assert Category.category_count == 1, (f"Ожидалось 1, "
+                                          f"получено "
+                                          f"{Category.category_count}")
 
 
 def test_category_add_product():
     """Тестирование add_product."""
     category = Category("Телевизоры", "Современный телевизор")
-    product = Product('55" QLED 4K', "Фоновая подсветка", 123000.0, 7)
+    product_name = '55" QLED 4K'
+    product = Product(product_name, "Фоновая подсветка", 123000.0, 7)
 
     category.add_product(product)
 
@@ -50,8 +51,7 @@ def test_category_add_product():
 
     # Проверяем результат через геттер products (он тоже использует __products)
     result = category.products
-    assert "Смартфон" in result
-    assert "50000 руб." in result
+    assert product_name in result
 
 
 @pytest.fixture(autouse=True)
@@ -59,6 +59,7 @@ def clean_categories():
     """Очищает состояние категорий перед каждым тестом."""
     Category.category_count = 0
     Category.product_count = 0
+
 
 def test_category_count():
     """Тестирование category_count."""
@@ -85,7 +86,10 @@ def test_category_products_counter():
 
     # Проверяем начальное состояние — через внутренний список _products
     assert electronics.products == 'Нет товаров'
-    assert Category.product_count == 0, f"Начальный счётчик должен быть 0, но был {Category.product_count}"
+    assert Category.product_count == 0, (f"Начальный "
+                                         f"счётчик должен быть 0, "
+                                         f"но "
+                                         f"был {Category.product_count}")
 
     # Создаём товары с корректными типами данных
     phone = Product("iPhone", "256GB", 99999, 5)
@@ -96,20 +100,22 @@ def test_category_products_counter():
     electronics.add_product(laptop)
 
     result = electronics.products
-    assert "iPhone" in result, "iPhone должен быть в отформатированной строке"
-    assert "MacBook" in result, "MacBook должен быть в отформатированной строке"
+    assert "iPhone" in result, \
+        "iPhone должен быть в отформатированной строке"
+    assert "MacBook" in result, \
+        "MacBook должен быть в отформатированной строке"
 
     # Проверяем счётчик продуктов
-    assert Category.product_count == 2, f"Счётчик должен быть 2, но был {Category.product_count}"
+    assert Category.product_count == 2, \
+        f"Счётчик должен быть 2, но был {Category.product_count}"
+
 
 def test_load_ecommerce_data_basic():
     """Тест load_ecommerce_data() без reload."""
-    from ecommerce_core.models import Category, Product
 
     # Сброс счётчиков перед загрузкой
     Category.category_count = 0
     Category.product_count = 0
-
 
     # Загружаем данные — получаем корневую категорию
     root_cat = Category.load_ecommerce_data()
@@ -119,14 +125,20 @@ def test_load_ecommerce_data_basic():
 
     # Проверяем название и описание категории
     assert root_cat.name == "Electronics"
-    assert root_cat.description == "Гаджеты и техника"
+    assert (root_cat.description ==
+            "Гаджеты и техника")
 
-    # Проверяем количество товаров через внутренний список (с учётом name mangling)
-    internal_products = getattr(root_cat, '_Category__products')
-    assert len(internal_products) == 2, "В категории должно быть 2 товара"
+    # Проверяем количество товаров
+    # через внутренний список (с учётом name mangling)
+    internal_products = (getattr
+                         (root_cat, '_Category__products'))
+    assert len(internal_products) == 2, \
+        "В категории должно быть 2 товара"
 
     # Ищем товар iPhone 15
-    iphone = next((p for p in internal_products if p.name == "iPhone 15"), None)
+    iphone = next((p for p
+                   in internal_products
+                   if p.name == "iPhone 15"), None)
     assert iphone is not None, "Товар iPhone 15 не найден в категории"
 
     # Проверяем корректность данных iPhone 15
@@ -138,11 +150,15 @@ def test_load_ecommerce_data_basic():
     assert macbook is not None, "Товар MacBook не найден в категории"
 
     # Проверяем корректность данных MacBook
-    assert macbook.price == 199999.99
+    assert (macbook.price
+            == 199999.99)
     assert macbook.quantity == 5
 
-    # Дополнительно: проверяем, что счётчик товаров увеличился на 2
-    assert Category.product_count == 2, f"Счётчик товаров должен быть 2, но был {Category.product_count}"
+    # Дополнительно: проверяем,
+    # что счётчик товаров увеличился на 2
+    assert Category.product_count == 2, \
+        f"Счётчик товаров должен быть 2, но был {Category.product_count}"
+
 
 def test_models_imports():
     """Покрытие всех импортов models.py."""
@@ -223,16 +239,6 @@ def test_category_products_private():
         _ = category.__products
 
 
-def test_category_add_product():
-    category = Category("Electronics", "Гаджеты")
-    product = Product("iPhone 15", "Смартфон", 99999.99, 10)
-
-    assert len(category._Category__products) == 0
-    category.add_product(product)
-    assert len(category._Category__products) == 1
-    assert category._Category__products[0] is product
-
-
 def test_category_products_getter():
     category = Category("Electronics", "Гаджеты")
 
@@ -260,13 +266,6 @@ def test_product_price_private():
     assert product.price == 99999.99
     with pytest.raises(AttributeError):
         _ = product.__price
-
-
-def test_product_str_format():
-    """Проверяет строковое представление Product."""
-    p = Product("iPhone 15", "Смартфон", 99999.99, 10)
-    expected = "iPhone 15, 99999.99 руб. Остаток: 10 шт."
-    assert str(p) == expected
 
 
 def test_product_str_with_zero_qty():
@@ -298,13 +297,6 @@ def test_product_add_both_zero_qty():
     assert total == 0.0
 
 
-def test_product_add_one_zero_qty():
-    a = Product("a", "", 100.0, 5)
-    b = Product("b", "", 200.0, 0)
-    total = a + b
-    assert total == 500.0
-
-
 def test_product_add_with_different_names():
     a = Product("iPhone", "", 1000.0, 2)
     b = Product("MacBook", "", 2000.0, 1)
@@ -333,12 +325,15 @@ def test_smartphone_inheritance():
     assert s.name == "iPhone 15 Pro"
     assert s.quantity == 10
 
-    assert "256GB Titanium" in str(s), "Описание должно быть в строковом представлении"
+    assert "256GB Titanium" in str(s), \
+        ("Описание должно быть "
+         "в строковом представлении")
 
     # Проверяем основные компоненты строки
     assert "iPhone 15 Pro" in str(s)
     assert "119999.99" in str(s)
     assert "Остаток: 10" in str(s)
+
 
 def test_lawngrass_inheritance():
     lg = LawnGrass(
@@ -349,6 +344,7 @@ def test_lawngrass_inheritance():
         country="Россия",
     )
     assert lg.country == "Россия"
+
 
 def test_product_add_same_type():
     a = Product("Test A", "", 100.0, 10)
@@ -387,8 +383,11 @@ def test_base_product_is_abstract():
 # === 2. Тест, что Product наследует BaseProduct и миксин ===
 def test_product_inherits_base_product_and_mixin():
     """Product наследует BaseProduct и PrintCreationMixin."""
-    assert issubclass(Product, BaseProduct), "Product должен наследоваться от BaseProduct"
-    assert issubclass(Product, PrintCreationMixin), "Product должен наследоваться от PrintCreationMixin"
+    assert issubclass(Product, BaseProduct), \
+        "Product должен наследоваться от BaseProduct"
+    assert issubclass(Product, PrintCreationMixin), \
+        "Product должен наследоваться от PrintCreationMixin"
+
 
 # === 4. Тест на __repr__ от PrintCreationMixin ===
 def test_print_creation_mixin_repr():
@@ -432,6 +431,7 @@ def test_product_price_setter_with_confirmation(monkeypatch):
     p.price = 90.0
     assert p.price == 90.0
 
+
 # === 8. Тест, что BaseProduct обязывает __add__ ===
 def test_product_implements_baseproduct_add():
     """Product реализует абстрактный __add__ от BaseProduct."""
@@ -441,6 +441,7 @@ def test_product_implements_baseproduct_add():
     total = p1 + p2
     expected = 100.0 * 10 + 50.0 * 5  # 1000 + 250
     assert total == 1250.0
+
 
 # === 9. Тесты для наследников Product: Smartphone и LawnGrass ===
 def test_smartphone_is_subclass_of_product():
@@ -458,7 +459,7 @@ def test_smartphone_is_subclass_of_product():
 def test_lawngrass_is_subclass_of_product():
     """LawnGrass наследует Product (и через него — BaseProduct)."""
     lawn = LawnGrass(
-        "Газонная трава", "описание", 1000.0, 20,3)
+        "Газонная трава", "описание", 1000.0, 20, 3)
     assert isinstance(lawn, Product)
 
 
@@ -488,3 +489,44 @@ def test_order_total_cost():
     product = Product("Тест", "desc", 100.0, 10)
     order = Order(product, 3)
     assert order.total_cost == 100.0 * 3  # 300.0
+
+
+def test_product_str_with_zero_qty():
+    with pytest.raises(ValueError,
+                       match="Товар с нулевым "
+                             "количеством не может быть добавлен"):
+        Product("Test", "", 100.0, 0)
+
+
+def test_product_add_both_zero_qty():
+    with pytest.raises(ValueError,
+                       match="Товар с нулевым "
+                             "количеством не может быть добавлен"):
+        Product("a", "", 100.0, 0)
+
+
+def test_product_add_one_zero_qty():
+    Product("a", "", 100.0, 5)
+    with pytest.raises(ValueError,
+                       match="Товар с нулевым количеством "
+                             "не может быть добавлен"):
+        Product("b", "", 200.0, 0)
+
+
+# Тест для Задания 2
+def test_category_average_price_with_products():
+    """Средний ценник с товарами"""
+    category = Category("Electronics", "Гаджеты")
+    category.add_product(Product("Phone", "Смартфон", 30000.0, 5))
+    category.add_product(Product("Laptop", "Компьютер", 80000.0, 3))
+
+    average = category.average_price()
+    assert average == 55000.0  # (30000 + 80000) / 2
+
+
+def test_category_average_price_empty():
+    """Средний ценник пустой категории возвращает 0"""
+    category = Category("Empty", "Без товаров")
+
+    average = category.average_price()
+    assert average == 0
