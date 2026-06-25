@@ -90,17 +90,12 @@ class PrintCreationMixin:
 
     def __init__(self, *args, **kwargs):
         class_name = self.__class__.__name__
-        args_str = ', '.join(repr(arg) for arg in args)
-        if kwargs:
-            kwargs_str = ', '.join(f'{k}={v!r}' for k, v in kwargs.items())
-            line = f"{class_name}({args_str}, {kwargs_str})"
-        else:
-            line = f"{class_name}({args_str})"
-
+        args_to_show = args[:4]
+        args_str = ', '.join(repr(arg) for arg in args_to_show)
+        line = f"{class_name}({args_str}, {kwargs_str})" if kwargs else f"{class_name}({args_str})"
         print(line)
 
-        self._init_args = args
-        self._init_kwargs = kwargs
+        super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
         args_str = ', '.join(repr(arg) for arg in self._init_args)
@@ -116,7 +111,6 @@ class PrintCreationMixin:
 class Product(BaseProduct, PrintCreationMixin):
     def __init__(self, name, description, price, quantity):
         super().__init__(name, description, price, quantity)
-        PrintCreationMixin.__init__(self, name, description, price, quantity)
 
         if quantity == 0:
             raise ValueError(
@@ -139,10 +133,10 @@ class Category:
     category_count = 0
     product_count = 0
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, products=None):
         self.name = name
         self.description = description
-        self.__products = []
+        self.__products = products if products is not None else []
         Category.category_count += 1
 
     def add_product(self, product):
@@ -164,6 +158,10 @@ class Category:
                 f"Остаток: {product.quantity} шт."
             )
         return '\n'.join(formatted_products)
+
+    @products.setter
+    def products(self, value):
+        self._products = value
 
     def average_price(self):  # ✅ Новый метод
         try:
@@ -235,13 +233,32 @@ class Smartphone(Product):
             description: str,
             price: float,
             quantity: int,
-            os: str):
+            efficiency: float,
+            model: str = "",
+            memory: int = 0,
+            color: str = ""
+    ):
         super().__init__(name, description, price, quantity)
-        self.__os = os
+        self.__efficiency = efficiency
+        self.__model = model
+        self.__memory = memory
+        self.__color = color
 
     @property
-    def os(self) -> str:
-        return self.__os
+    def efficiency(self) -> float:
+        return self.__efficiency
+
+    @property
+    def model(self) -> str:
+        return self.__model
+
+    @property
+    def memory(self) -> int:
+        return self.__memory
+
+    @property
+    def color(self) -> str:
+        return self.__color
 
     def __str__(self) -> str:
         return (
@@ -265,13 +282,26 @@ class LawnGrass(Product):
             description: str,
             price: float,
             quantity: int,
-            country: str):
+            country: str,  # 5-й
+            germination_period: str,  # 6-й (новый, для get_info)
+            color: str  # 7-й (новый, для get_info)
+    ):
         super().__init__(name, description, price, quantity)
         self.__country = country
+        self.__germination_period = germination_period
+        self.__color = color
 
     @property
     def country(self) -> str:
         return self.__country
+
+    @property
+    def germination_period(self) -> str:
+        return self.__germination_period
+
+    @property
+    def color(self) -> str:
+        return self.__color
 
     def __str__(self) -> str:
         return (
@@ -283,6 +313,7 @@ class LawnGrass(Product):
         return self.price * self.quantity
 
     def get_info(self) -> str:
+        # Теперь эти атрибуты тоже существуют
         return (f"{self.name}: {self.season}, "
                 f"рост {self.growth_rate}м/год, "
                 f"{self.price} руб.")
