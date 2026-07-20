@@ -23,7 +23,7 @@ class Category:
         Category.product_count += 1
 
     @classmethod  # ← 4 ПРОБЕЛА!
-    def load_ecommerce_data(cls):  # ← 4 ПРОБЕЛА!
+    def load_ecommerce_data(cls):  
         """🆕 Загрузка тестовых данных — метод класса!"""
         electronics = cls("Electronics", "Гаджеты и техника")
         electronics.add_product(Product("iPhone 15", "Смартфон", 99999.99, 10))
